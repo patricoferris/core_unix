@@ -48,13 +48,22 @@ static inline value val_underlying_of_clockid_t(clockid_t clock) {
   return Val_long(clock);
 }
 
+// Quick hack to try out bonsai on macOS
+int clock_id(int pid, clockid_t *clock) {
+  #ifdef __APPLE__
+  return -1;
+  #elif
+  return clock_getcpuclockid(pid, &clock);
+  #endif
+}
+
 
 CAMLprim value caml_clock_getcpuclockid(value v_pid) {
   pid_t pid = Long_val(v_pid);
 
   clockid_t clock;
 
-  int ret = clock_getcpuclockid(pid, &clock);
+  int ret = clock_id(pid, &clock);
 
   /*  HEADS UP: error returns are *not* negated here, quite surprisingly. Check the man
       page. Error codes are positive here. */
